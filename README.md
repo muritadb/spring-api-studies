@@ -1,5 +1,3 @@
-Certo, aqui está um exemplo de README.md para um projeto de estudos em Spring Boot:
-
 # Projeto de Estudos em Spring Boot
 
 Este é um projeto de estudos para aprender os conceitos e funcionalidades do framework Spring Boot.
