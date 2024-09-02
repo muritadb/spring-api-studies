@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=spring-api
+      - POSTGRES_USER=sa
+      - POSTGRES_PASSWORD=123
+
+  spring-app:
+    image: spring-api:latest
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgressql://postgres-db:5432/spring
+    depends_on:
+      - postgres-db

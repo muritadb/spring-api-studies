@@ -1,0 +1,263 @@
+
+Colaboração: Deploy no Render para a Seção 23
+0 votos a favor
+Juvenal · Aula 331 · 1 mês atrás
+ESTE É UM TUTORIAL COMPLEMENTAR PARA DEPLOY DO PROJETO NO RENDER COMO SUBSTITUTO DO HEROKU
+
+ESTAREI COLOCANDO ABAIXO OS VIDEOS DO CURSO QUE VOCÊ DEVE VER
+
+
+
+Assista na Seção 23 os videos:
+
+323. Instalação do PostgreSQL
+
+324. Profile dev
+
+325. Obtendo script SQL a partir do PostgreSQL local
+
+
+
+----- CRIANDO CONTA NO RENDER -----
+
+
+
+site: render.com
+
+
+
+1 - Faça o cadastro no Render com sua conta do GitHub
+
+2 - Você será redirecionado para o GitHub e autorizar o Render, se todos os seu repositórios forem públicos marque como ALL
+
+2 - No Render no canto superior direito clique em + New
+
+3 - Clique em PostgreSQL
+
+4 - Em Name de um nome para a instância ex: render_postgresql
+
+5 - Em Database de um nome para database ex: springboot_course
+
+6 - Em User de um nome ao usuário administrador: ex: admin
+
+7 - Em PostgreSQL Version selecione a versão que você usa localmente
+
+8 - Em Instance Type selecione Free
+
+9 - Clique em Create Database
+
+
+
+Agora clique em Dashboard, e veja a lista abaixo deve constar na lista a sua instância de postgreSQL criada no meu caso render_postgresql, clique nela;
+
+Na nova tela copie e cole os seguintes itens em um documento de texto vazio:
+
+
+
+Hostname
+
+Port
+
+Database
+
+Username
+
+Password
+
+External Database URL
+
+
+
+----- CONFIGURANDO O PGADMIN COM O RENDER -----
+
+
+
+Assista na Seção 23 os videos:
+
+326. Executando script SQL no servidor remoto
+
+
+
+Atenção os itens abaixo são complementares ao video, substituindo o Heroku pelo Render
+
+
+
+Faça as seguintes substituições:
+
+
+
+Na gia General em name coloque Render
+
+Na gia Connection em Host name/addres cole a url copiad acima de External Database URL e faça as seguintes modificações:
+
+postgresql://<APAGUE TUDO QUE ESTIVER ENTRE A BARRA E O ARROBA>@dpg-cq1ijf88fa8c73f778f0-a.oregon-postgres.render.com<APÓS O com APAGE TUDO>
+
+        O endereço firacá algo como: postgresql://@dpgskfskasd-a.oregon-postgres.render.com
+
+Em Maintenance database cole o nome Database que você colocou no Render acima
+
+Em Username cole o username que você colocou no Render acima
+
+Em Password cole o password que você copiou do Render, e selecione Save password para salvar a senha
+
+Na gia Advanced em DB restriction cole novamente o nome do Database
+
+
+
+----- AJUSTANDO O PROJETO NO STS -----
+
+
+
+Assista na Seção 23 os videos:
+
+328. Executando script SQL no servidor remoto
+
+
+
+Nesta etapa você irá substituir o que está no arquivo application-prod.properties
+
+Cole as informações abaixo no arquivo:
+
+
+
+spring.datasource.url=${DATABASE_URL}
+
+spring.datasource.username=${DATABASE_USERNAME}
+
+spring.datasource.password=${DATABASE_PASSWORD}
+
+
+
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+spring.jpa.hibernate.ddl-auto=update
+
+spring.jpa.show-sql=true
+
+spring.jpa.properties.hibernate.format_sql=false
+
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+
+
+Ainda no projeto crie um file na raiz do projeto com o nome: Dockerfile
+
+Copie e cole o código abaixo e salve o arquivo (obs: estou supondo que você está usando o java 17):
+
+
+
+FROM ubuntu:latest AS build
+
+
+
+RUN apt-get update && \
+
+    apt-get install -y openjdk-17-jdk maven && \
+
+    apt-get clean
+
+
+
+WORKDIR /app
+
+
+
+COPY . .
+
+
+
+RUN mvn clean package -DskipTests
+
+
+
+FROM openjdk:17-jdk-slim
+
+
+
+EXPOSE 8080
+
+
+
+COPY --from=build /app/target/course-0.0.1-SNAPSHOT.jar app.jar
+
+
+
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
+
+
+
+SALVE TODOS OS ARQUIVOS E NÃO ESQUEÇA DE FAZER COMMIT PARA O SEU REPOSITÓRIO NO GITHUB
+
+
+
+----- CRIANDO WEB SERVICE -----
+
+
+
+Volte ao Reder e em + New no cando superior direito clique em Web Service
+
+
+
+1 - Marque Build and deploy from a Git repository e clique em next
+
+2 - Selecione o repositório do projeto
+
+3 - Em Name de um nome ao web service
+
+4 - Em Language selecione Docker
+
+5 - Em Branch veja se esta como main
+
+6 - Em Instance Type selecione Free
+
+7 - Clique em Deploy Web Service no final da página
+
+
+
+Agora no menu esquerdo vá em Environment
+
+
+
+crie os seguintes itens
+
+
+
+
+
+Key: DATABASE_URL
+
+Value:jdbc:postgresql://COLE_AQUI_SEU_HOSTNAME_COPIADO_ANTERIORMENTE:5432/COLE_AQUI_O_NOME_DO_DB_COPIADO_ANTERIORMENTE
+
+Key: DATABASE_USERNAME Value: cole aqui o username copiado anteriormente
+
+Key: DATABASE_PASSWORD Value: cole aqui o password copiado anteriormente
+
+
+
+Feito isso ainda no menu esquerdo vá em Events, na tela que aparece vá à direita e acima da página, clique em Manual Deploy e depois em Deploy latest commit
+
+Quando aparecer a mensagem:
+
+
+
+==> Your service is live 🎉
+
+==> Detected a new open port HTTP:8080
+
+
+
+Seu sistema estara funcionando:
+
+Volte agora para cima da página a esquerda você notará que abaixo onde sinaliza o seu repositório no GitHub existe um link.
+
+Copie este link, abra o Postman e altere as url de requisição:
+
+
+
+De: http://localhost:8080/users
+
+Para: SEU_LINK/users
+
+
+
+Obs: todos os http://localhost:8080 devem ser substituido pelo seu link
